@@ -2338,3 +2338,84 @@ select,
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+/* ===== FIX MOBILE SPACING ===== */
+@media (max-width: 768px) {
+  /* Perbaiki spacing untuk home page */
+  .home-container {
+    padding: 10px; /* Hapus padding yang berlebihan */
+  }
+  .logo{
+    margin-left: 12px !important; /* Kurangi margin kanan logo */
+  }
+  /* Perbaiki hero section untuk mobile */
+  .hero-section {
+    padding: 20px 0 40px !important; /* Kurangi padding vertikal */
+    min-height: auto !important; /* Hapus min-height yang besar */
+    margin-top: 0 !important;
+  }
+  
+  /* Pastikan konten tidak terlalu jauh dari header */
+  main {
+    padding: 20px 0 !important;
+  }
+  
+  /* Kurangi margin/padding pada section lain */
+  .products-section,
+  .filter-section {
+    margin: 20px 0 !important;
+  }
+  
+  /* Perbaiki spacing pada judul */
+  .hero-title {
+    margin-top: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  
+  .hero-subtitle {
+    margin-bottom: 24px !important;
+  }
+  
+  /* Header lebih ketat di mobile */
+  .header {
+    padding: 0 !important;
+  }
+  
+  .nav {
+    padding: 12px 0 !important;
+    height: 60px !important;
+  }
+}
+
+/* Untuk layar sangat kecil */
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 16px 0 30px !important;
+    gap: 24px !important;
+  }
+  
+  .hero-title {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
+  }
+  
+  .hero-subtitle {
+    font-size: 15px !important;
+    margin-bottom: 20px !important;
+  }
+  
+  .hero-cta {
+    margin-top: 20px !important;
+  }
+  
+  .section-header {
+    margin-bottom: 20px !important;
+  }
+}
+/* GLOBAL FIX FOR LUCIDE ICONS IN BUTTON */
+button svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  display: block;
+  flex-shrink: 0;
+}

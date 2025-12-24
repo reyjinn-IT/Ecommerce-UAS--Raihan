@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { 
   ShoppingCart, Menu, X, User, LogOut, LogIn, Home, Package, 
-  BarChart3, FileText, Settings, ChevronRight
+  BarChart3, FileText, ChevronRight, AlertCircle
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +15,7 @@ const Header = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const mobileMenuRef = useRef(null);
   const menuButtonRef = useRef(null);
@@ -26,6 +27,18 @@ const Header = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Check if mobile on resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    checkMobile(); // Check initial size
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   // Close mobile menu when clicking outside or pressing ESC
@@ -99,23 +112,71 @@ const Header = () => {
         background: scrolled ? 'rgba(255, 255, 255, 0.98)' : 'white',
         backdropFilter: scrolled ? 'blur(10px)' : 'none',
         transition: 'all 0.3s ease',
-        zIndex: 1000
+        zIndex: 1000,
+        position: 'sticky',
+        top: 0,
+        borderBottom: '1px solid #e5e7eb'
       }}>
-        <nav className="nav container">
-          <Link to="/" className="logo" onClick={() => setShowMobileMenu(false)}>
-            <span className="logo-icon">🛍️</span>
+        <nav className="nav container" style={{
+          maxWidth: '1280px',
+          margin: '0 auto',
+          padding: '0 24px',
+          height: '70px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Link to="/" className="logo" onClick={() => setShowMobileMenu(false)} style={{
+            fontSize: '24px',
+            fontWeight: '700',
+            color: '#115bd1ff',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
             Blibeli
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="nav-links">
+          {/* Desktop Navigation - Visible only on desktop */}
+          <div className="nav-links" style={{
+            display: isMobile ? 'none' : 'flex',
+            alignItems: 'center',
+            gap: '24px'
+          }}>
             {user && user.role === 'admin' ? (
               <>
-                <Link to="/admin/dashboard" className="nav-link">
+                <Link to="/admin/dashboard" className="nav-link" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#4b5563',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <BarChart3 size={16} />
                   Dashboard
                 </Link>
-                <Link to="/admin/reports" className="nav-link">
+                <Link to="/admin/reports" className="nav-link" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#4b5563',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <FileText size={16} />
                   Reports
                 </Link>
@@ -123,39 +184,47 @@ const Header = () => {
             ) : (
               // Customer/Guest Navigation
               <>
-                <Link to="/" className="nav-link">
+                <Link to="/" className="nav-link" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#4b5563',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <Home size={16} />
                   Home
                 </Link>
-                <Link to="/products" className="nav-link">
+                <Link to="/products" className="nav-link" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  color: '#4b5563',
+                  textDecoration: 'none',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                   <Package size={16} />
                   Products
                 </Link>
-                <Link to="/cart" className="nav-link">
-                  <ShoppingCart size={16} />
-                  Cart
-                </Link>
               </>
-            )}
-
-            {user ? (
-              <button
-                onClick={() => setShowLogoutModal(true)}
-                className="nav-link logout-btn"
-              >
-                <LogOut size={16} />
-                Logout ({user.name})
-              </button>
-            ) : (
-              <Link to="/login" className="nav-link login-btn">
-                <LogIn size={16} />
-                Login
-              </Link>
             )}
           </div>
 
-          {/* Mobile Navigation Button & Cart */}
-          <div className="cart-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Right side with Cart, Login/User, and Mobile Menu Button */}
+          <div className="right-section" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Cart Icon - Always visible for customers */}
             {(!user || user.role === 'customer') && (
               <Link 
                 to="/cart" 
@@ -166,9 +235,10 @@ const Header = () => {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  padding: '8px',
+                  padding: '8px 12px',
                   borderRadius: '8px',
-                  transition: 'background 0.2s'
+                  transition: 'background 0.2s',
+                  textDecoration: 'none'
                 }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
@@ -177,51 +247,131 @@ const Header = () => {
                 {getTotalItems() > 0 && (
                   <span style={{
                     position: 'absolute',
-                    top: '-5px',
-                    right: '-5px',
+                    top: '2px',
+                    right: '2px',
                     background: '#ef4444',
                     color: 'white',
-                    fontSize: '11px',
+                    fontSize: '10px',
                     fontWeight: '700',
-                    minWidth: '18px',
-                    height: '18px',
-                    borderRadius: '9px',
+                    minWidth: '16px',
+                    height: '16px',
+                    borderRadius: '8px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    padding: '0 4px'
+                    padding: '0 3px'
                   }}>
                     {getTotalItems()}
                   </span>
                 )}
               </Link>
             )}
+
+            {/* User/Auth Section - Desktop */}
+            <div className="auth-section" style={{
+              display: isMobile ? 'none' : 'flex',
+              alignItems: 'center'
+            }}>
+              {user ? (
+                // User info with dropdown
+                <div style={{ position: 'relative' }}>
+                  <button
+                    className="user-dropdown-btn"
+                    onClick={() => setShowLogoutModal(true)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      background: 'none',
+                      border: 'none',
+                      padding: '8px 12px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#4b5563'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                  >
+                    <div style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: '600',
+                      fontSize: '12px'
+                    }}>
+                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span style={{ 
+                      maxWidth: '100px', 
+                      whiteSpace: 'nowrap', 
+                      overflow: 'hidden', 
+                      textOverflow: 'ellipsis',
+                      fontSize: '14px'
+                    }}>
+                      {user.name}
+                    </span>
+                  </button>
+                </div>
+              ) : (
+                // Login button
+                <Link to="/login" className="login-btn" style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  background: '#2563eb',
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#1d4ed8'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#2563eb'}>
+                  <LogIn size={16} />
+                  <span>Login</span>
+                </Link>
+              )}
+            </div>
             
-            <button 
-              ref={menuButtonRef}
-              className="mobile-menu-btn"
-              onClick={handleMenuButtonClick}
-              aria-label="Toggle mobile menu"
-              aria-expanded={showMobileMenu}
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-            >
-              {showMobileMenu ? 
-                <X size={24} color="#4b5563" /> : 
-                <Menu size={24} color="#4b5563" />
-              }
-            </button>
+            {/* Mobile Menu Button - Only visible on mobile */}
+            {isMobile && (
+              <button 
+                ref={menuButtonRef}
+                className="mobile-menu-btn"
+                onClick={handleMenuButtonClick}
+                aria-label="Toggle mobile menu"
+                aria-expanded={showMobileMenu}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: '8px',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.2s',
+                  marginLeft: '4px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              >
+                {showMobileMenu ? 
+                  <X size={24} color="#4b5563" /> : 
+                  <Menu size={24} color="#4b5563" />
+                }
+              </button>
+            )}
           </div>
         </nav>
 
@@ -407,7 +557,7 @@ const Header = () => {
                   onMouseLeave={(e) => e.currentTarget.style.background = '#2563eb'}
                 >
                   <LogIn size={20} />
-                  Login / Register
+                  Login
                 </button>
               )}
             </div>
@@ -458,37 +608,222 @@ const Header = () => {
 
       {/* Logout Confirmation Modal */}
       {showLogoutModal && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <div className="modal-header">
-              <h3>Confirm Logout</h3>
-              <button
-                className="modal-close"
-                onClick={() => setShowLogoutModal(false)}
-              >
-                ×
-              </button>
+        <div 
+          className="modal-overlay" 
+          onClick={() => setShowLogoutModal(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1100,
+            padding: '16px',
+            animation: 'fadeIn 0.2s ease'
+          }}
+        >
+          <div 
+            className="modal-container" 
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              width: '100%',
+              maxWidth: '420px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+              animation: 'slideIn 0.3s ease'
+            }}
+          >
+            {/* Modal Header */}
+            <div style={{
+              padding: '24px 24px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '50%',
+                // background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '2px solid #aa0909ff'
+              }}>
+                <AlertCircle size={28} color="#d97706" />
+              </div>
             </div>
-            <div className="modal-body">
-              <p>Are you sure you want to logout?</p>
+
+            {/* Modal Body */}
+            <div style={{ padding: '0 24px 24px', textAlign: 'center' }}>
+              <h3 style={{ 
+                margin: '0 0 8px', 
+                fontSize: '20px', 
+                fontWeight: '600', 
+                color: '#1e293b' 
+              }}>
+                Logout Confirmation
+              </h3>
+              <p style={{ 
+                margin: 0, 
+                color: '#64748b', 
+                fontSize: '15px', 
+                lineHeight: '1.6',
+                marginBottom: '24px'
+              }}>
+                Are you sure you want to log out of your account?
+              </p>
+
+              {/* User Info (if available) */}
+              {user && (
+                <div style={{
+                  background: '#f8fafc',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '24px',
+                  textAlign: 'left'
+                }}>
+                  <div style={{ 
+                    fontSize: '13px', 
+                    color: '#64748b', 
+                    fontWeight: '500',
+                    marginBottom: '4px'
+                  }}>
+                    You're logged in as:
+                  </div>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '12px' 
+                  }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #2563eb, #3b82f6)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white',
+                      fontWeight: '600',
+                      fontSize: '14px',
+                      flexShrink: 0
+                    }}>
+                      {user.name?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <div>
+                      <div style={{ 
+                        fontSize: '15px', 
+                        fontWeight: '600', 
+                        color: '#1e293b' 
+                      }}>
+                        {user.name || 'User'}
+                      </div>
+                      <div style={{ 
+                        fontSize: '13px', 
+                        color: '#64748b' 
+                      }}>
+                        {user.email}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="modal-footer">
+
+            {/* Modal Actions */}
+            <div style={{
+              padding: '20px 24px 24px',
+              display: 'flex',
+              gap: '12px',
+              borderTop: '1px solid #f1f5f9'
+            }}>
               <button
-                className="btn btn-secondary"
+                className="btn-cancel"
                 onClick={() => setShowLogoutModal(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  background: '#f1f5f9',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: '#475569',
+                  fontSize: '15px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#e2e8f0'}
+                onMouseLeave={(e) => e.currentTarget.style.background = '#f1f5f9'}
               >
                 Cancel
               </button>
               <button
-                className="btn remove-btn"
+                className="btn-confirm"
                 onClick={handleLogout}
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  color: 'white',
+                  fontSize: '15px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, #dc2626, #b91c1c)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)'}
               >
-                Yes, Logout
+                <LogOut size={18} />
+                Logout
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Add CSS animations */}
+      <style jsx>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: translateY(-20px) scale(0.95);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        .modal-container {
+          animation: slideIn 0.3s ease;
+        }
+        
+        .modal-overlay {
+          animation: fadeIn 0.2s ease;
+        }
+      `}</style>
     </>
   );
 };

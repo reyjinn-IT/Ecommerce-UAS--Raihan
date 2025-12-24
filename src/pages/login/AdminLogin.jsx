@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft, Shield } from 'lucide-react';
+import './admin.css';
 
 const AdminLogin = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,7 @@ const AdminLogin = () => {
       };
 
       if (formData.email !== adminCredentials.email || formData.password !== adminCredentials.password) {
-        setError('Invalid admin credentials');
+        setError('Email or password is incorrect.');
         setLoading(false);
         return;
       }
@@ -69,21 +70,21 @@ const AdminLogin = () => {
 
         {error && (
           <div className="auth-error">
-            <div className="error-icon">⚠️</div>
+            <div className="error-icon"></div>
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label className="form-label">Admin Email</label>
+            <label className="form-label">Email</label>
             <div className="input-group">
               <Mail size={20} className="input-icon" />
               <input
                 type="email"
                 name="email"
                 className="form-input"
-                placeholder="admin@blibeli.com"
+                // placeholder=""  
                 value={formData.email}
                 onChange={handleInputChange}
                 required
@@ -99,7 +100,7 @@ const AdminLogin = () => {
                 type={showPassword ? 'text' : 'password'}
                 name="password"
                 className="form-input"
-                placeholder="••••••••"
+                // placeholder=""
                 value={formData.password}
                 onChange={handleInputChange}
                 required
@@ -141,13 +142,6 @@ const AdminLogin = () => {
         </div>
 
         <div className="auth-footer">
-          <div className="login-links">
-            <Link to="/login/customer" className="admin-login-link">
-              <span>Are you a customer?</span>
-              <span className="link-arrow">→</span>
-            </Link>
-          </div>
-          
           <Link to="/" className="back-home">
             <ArrowLeft size={16} />
             Back to Home

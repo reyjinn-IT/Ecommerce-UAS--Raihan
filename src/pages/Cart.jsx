@@ -1,10 +1,11 @@
+import './cart.css';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShoppingBag,
   ArrowLeft,
   Trash2,
-  Plus,
-  Minus,
+  Plus,  // Ganti PlusIcon jadi Plus
+  Minus, // Ganti MinusIcon jadi Minus
   Package,
   Lock,
   User
@@ -19,12 +20,11 @@ const Cart = () => {
 
   const handleCheckout = () => {
     if (!user) {
-      // Redirect ke login jika belum login
       navigate('/login', { state: { from: '/checkout' } });
       return;
     }
     
-    // Jika sudah login, lanjut ke checkout
+    // Navigasi ke checkout
     navigate('/checkout');
   };
 
@@ -69,7 +69,7 @@ const Cart = () => {
             <div className="cart-item" key={item.id}>
               <div className="product-info-cart">
                 <div className="product-image-cart">
-                  <img src={item.image} alt={item.name} />
+                  <img src={item.image} alt={item.title} />
                 </div>
                 <div className="product-details-cart">
                   <h3 className="product-title-cart">{item.title}</h3>
@@ -92,7 +92,7 @@ const Cart = () => {
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   disabled={item.quantity <= 1}
                 >
-                  <Minus size={18} />
+                  <Minus size={18} /> {/* Perbaiki di sini */}
                 </button>
                 <input
                   type="number"
@@ -107,7 +107,7 @@ const Cart = () => {
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   disabled={item.quantity >= 10}
                 >
-                  <Plus size={18} />
+                  <Plus size={18} /> {/* Perbaiki di sini */}
                 </button>
               </div>
               
@@ -126,7 +126,7 @@ const Cart = () => {
                     onClick={() => updateQuantity(item.id, item.quantity - 1)}
                     disabled={item.quantity <= 1}
                   >
-                    <Minus size={16} />
+                    <Minus size={16} /> {/* Perbaiki di sini */}
                   </button>
                   <input
                     type="number"
@@ -141,7 +141,7 @@ const Cart = () => {
                     onClick={() => updateQuantity(item.id, item.quantity + 1)}
                     disabled={item.quantity >= 10}
                   >
-                    <Plus size={16} />
+                    <Plus size={16} /> {/* Perbaiki di sini */}
                   </button>
                 </div>
               </div>
@@ -153,7 +153,7 @@ const Cart = () => {
           ))}
           
           {/* Clear Cart Button */}
-          <div className="cart-actions" style={{ padding: '24px', textAlign: 'right' }}>
+          <div className="cart-actions">
             <button
               className="btn remove-btn"
               onClick={clearCart}
@@ -198,17 +198,17 @@ const Cart = () => {
                 <Package size={18} />
                 Shipping Estimate
               </div>
-              <div className="shipping-info" style={{ color: '#6b7280', fontSize: '14px' }}>
+              <div className="shipping-info">
                 {shipping === 0 ? (
-                  <p style={{ color: '#10b981', fontWeight: '600' }}>
-                    🎉 You qualify for free shipping!
+                  <p className="free-shipping">
+                    FREE shipping!
                   </p>
                 ) : (
                   <p>
                     Add ${(50 - subtotal).toFixed(2)} more to get free shipping
                   </p>
                 )}
-                <p style={{ marginTop: '8px', fontSize: '13px' }}>
+                <p className="delivery-info">
                   Delivery: 3-5 business days
                 </p>
               </div>
@@ -224,14 +224,6 @@ const Cart = () => {
           <button
             onClick={handleCheckout}
             className="checkout-btn"
-            style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '8px',
-              width: '100%',
-              marginBottom: '15px'
-            }}
           >
             <Lock size={20} />
             {user ? 'Proceed to Checkout' : 'Login to Checkout'}
@@ -239,16 +231,9 @@ const Cart = () => {
           
           {/* Login reminder for non-logged in users */}
           {!user && (
-            <div className="login-reminder" style={{
-              background: '#fff3cd',
-              border: '1px solid #ffeaa7',
-              padding: '15px',
-              borderRadius: '8px',
-              marginBottom: '15px',
-              textAlign: 'center'
-            }}>
-              <p style={{ color: '#856404', fontSize: '14px', margin: 0 }}>
-                ⚠️ Please login to complete your purchase
+            <div className="login-reminder">
+              <p>
+                Please login to complete your purchase
               </p>
             </div>
           )}

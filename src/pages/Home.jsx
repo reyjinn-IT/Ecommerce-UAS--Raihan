@@ -13,6 +13,12 @@ const Home = () => {
     <div className="home-container">
       {/* Hero Section - SIMPLE */}
       <section className="hero-section">
+        <div className="hero-image">
+          <img 
+            src={banner} 
+            alt="Shopping Experience" 
+          />
+        </div>
         <div className="hero-content">
           <h1 className="hero-title">
             Welcome to <span className="text-primary">Blibeli Store</span>
@@ -34,12 +40,6 @@ const Home = () => {
           </div>
         </div>
         
-        <div className="hero-image">
-          <img 
-            src={banner} 
-            alt="Shopping Experience" 
-          />
-        </div>
       </section>
 
       

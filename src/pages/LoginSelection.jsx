@@ -22,7 +22,7 @@ const LoginSelection = () => {
         {/* Login Options Grid */}
         <div className="selection-grid">
           {/* Customer Login Card */}
-          <Link to="/login/customer" className="selection-card customer-card">
+          <Link to="/login" className="selection-card customer-card">
             <div className="card-icon">
               <Users size={40} />
             </div>
@@ -40,8 +40,8 @@ const LoginSelection = () => {
               </span>
             </div>
           </Link>
-
-          {/* Admin Login Card */}
+{/* 
+          Admin Login Card
           <Link to="/login/admin" className="selection-card admin-card">
             <div className="card-icon">
               <Shield size={40} />
@@ -59,7 +59,7 @@ const LoginSelection = () => {
                 <Settings size={18} />
               </span>
             </div>
-          </Link>
+          </Link> */}
         </div>
 
         {/* Guest Option */}
@@ -82,7 +82,7 @@ const LoginSelection = () => {
         </div>
 
         {/* Demo Credentials */}
-        <div className="demo-section">
+        {/* <div className="demo-section">
           <h3 className="demo-title">Demo Credentials</h3>
           <div className="demo-credentials">
             <div className="demo-card">
@@ -96,7 +96,7 @@ const LoginSelection = () => {
               <p><strong>Password:</strong> admin123</p>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

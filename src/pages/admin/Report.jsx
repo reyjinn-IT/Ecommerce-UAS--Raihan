@@ -3,12 +3,18 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   BarChart3, Download, Filter, Calendar, FileText, 
-  DollarSign, TrendingUp, TrendingDown, RefreshCw 
+  DollarSign, TrendingUp, TrendingDown, RefreshCw,
+  Users, Package, Target, Percent
 } from 'lucide-react';
+import './Report.css';
 
 const Report = () => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState('allMonths');
+  const [selectedMonth, setSelectedMonth] = useState('allMonths');
+
+  // Sample data for reports
   const [reportData, setReportData] = useState({
     monthlySales: [],
     topProducts: [],
@@ -16,10 +22,7 @@ const Report = () => {
     customerStats: {},
     revenueStats: {}
   });
-  const [timeRange, setTimeRange] = useState('last12months');
-  const [reportType, setReportType] = useState('sales');
 
-  // Sample data for reports
   const monthlyData = [
     { month: 'Jan', sales: 12000, orders: 45, profit: 8000 },
     { month: 'Feb', sales: 18000, orders: 62, profit: 12000 },
@@ -75,7 +78,7 @@ const Report = () => {
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [timeRange]);
+  }, []);
 
   const handleGenerateReport = () => {
     setLoading(true);
@@ -101,13 +104,25 @@ const Report = () => {
     document.body.removeChild(link);
   };
 
+  // Filter monthly data based on selected month
+  const filteredMonthlyData = selectedMonth === 'allMonths' 
+    ? reportData.monthlySales 
+    : reportData.monthlySales.filter(month => 
+        month.month.toLowerCase().startsWith(selectedMonth.substring(0, 3)));
+
+  // Calculate totals
+  const totalSales = filteredMonthlyData.reduce((sum, month) => sum + month.sales, 0);
+  const totalOrders = filteredMonthlyData.reduce((sum, month) => sum + month.orders, 0);
+  const totalProfit = filteredMonthlyData.reduce((sum, month) => sum + month.profit, 0);
+  const maxSales = Math.max(...filteredMonthlyData.map(m => m.sales));
+
   if (!user || user.role !== 'admin') {
     return (
-      <div className="empty-state">
-        <div className="empty-icon">🚫</div>
-        <h2 className="empty-title">Access Denied</h2>
-        <p className="empty-text">You don't have permission to access this page.</p>
-        <Link to="/login/admin" className="btn btn-primary">
+      <div className="access-denied">
+        <div className="denied-icon">🚫</div>
+        <h2 className="denied-title">Access Denied</h2>
+        <p className="denied-text">You don't have permission to access this page.</p>
+        <Link to="/login/admin" className="primary-btn">
           Admin Login
         </Link>
       </div>
@@ -116,354 +131,210 @@ const Report = () => {
 
   if (loading) {
     return (
-      <div className="loading">
-        <div className="spinner"></div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
         <p>Loading report data...</p>
       </div>
     );
   }
 
-  // Calculate totals
-  const totalSales = reportData.monthlySales.reduce((sum, month) => sum + month.sales, 0);
-  const totalOrders = reportData.monthlySales.reduce((sum, month) => sum + month.orders, 0);
-  const totalProfit = reportData.monthlySales.reduce((sum, month) => sum + month.profit, 0);
-
-  // Find max sales for chart scaling
-  const maxSales = Math.max(...reportData.monthlySales.map(m => m.sales));
-
   return (
-    <div className="admin-dashboard">
+    <div className="report-page">
       <div className="container">
         {/* Report Header */}
-        <div className="dashboard-header">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <h1 className="dashboard-title">Sales Reports</h1>
-              <p className="dashboard-subtitle">
+        <div className="report-header">
+          <div className="header-content">
+            <div className="header-text">
+              <h1 className="report-title">Sales Reports</h1>
+              <p className="report-subtitle">
                 Comprehensive sales analytics and insights
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
+            <div className="header-actions">
               <button 
                 onClick={handleGenerateReport}
-                className="btn btn-primary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="primary-btn"
               >
                 <RefreshCw size={18} />
-                Generate Report
+                <span>Generate Report</span>
               </button>
               <button 
                 onClick={handleExportCSV}
-                className="btn btn-secondary"
-                style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                className="secondary-btn"
               >
                 <Download size={18} />
-                Export CSV
+                <span>Export CSV</span>
               </button>
             </div>
           </div>
         </div>
 
         {/* Summary Stats */}
-        <div className="admin-stats-grid" style={{ marginBottom: '32px' }}>
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon" style={{ background: '#dbeafe', color: '#2563eb' }}>
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-icon primary">
               <DollarSign size={24} />
             </div>
-            <div className="admin-stat-info">
-              <div>
-                <div className="admin-stat-value">${totalSales.toLocaleString()}</div>
-                <div className="admin-stat-label">Total Sales</div>
-              </div>
-              <div className="admin-stat-change positive">
-                <TrendingUp size={16} />
-                12.5%
-              </div>
+            <div className="stat-info">
+              <div className="stat-value">${totalSales.toLocaleString()}</div>
+              <div className="stat-label">Total Sales</div>
+            </div>
+            <div className="stat-trend positive">
+              <TrendingUp size={16} />
+              <span>12.5%</span>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon" style={{ background: '#dcfce7', color: '#059669' }}>
+          <div className="stat-card">
+            <div className="stat-icon green">
               <BarChart3 size={24} />
             </div>
-            <div className="admin-stat-info">
-              <div>
-                <div className="admin-stat-value">{totalOrders}</div>
-                <div className="admin-stat-label">Total Orders</div>
-              </div>
-              <div className="admin-stat-change positive">
-                <TrendingUp size={16} />
-                8.2%
-              </div>
+            <div className="stat-info">
+              <div className="stat-value">{totalOrders}</div>
+              <div className="stat-label">Total Orders</div>
+            </div>
+            <div className="stat-trend positive">
+              <TrendingUp size={16} />
+              <span>8.2%</span>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon" style={{ background: '#fef3c7', color: '#d97706' }}>
+          <div className="stat-card">
+            <div className="stat-icon orange">
               <DollarSign size={24} />
             </div>
-            <div className="admin-stat-info">
-              <div>
-                <div className="admin-stat-value">${totalProfit.toLocaleString()}</div>
-                <div className="admin-stat-label">Total Profit</div>
-              </div>
-              <div className="admin-stat-change positive">
-                <TrendingUp size={16} />
-                15.3%
-              </div>
+            <div className="stat-info">
+              <div className="stat-value">${totalProfit.toLocaleString()}</div>
+              <div className="stat-label">Total Profit</div>
+            </div>
+            <div className="stat-trend positive">
+              <TrendingUp size={16} />
+              <span>15.3%</span>
             </div>
           </div>
 
-          <div className="admin-stat-card">
-            <div className="admin-stat-icon" style={{ background: '#f3e8ff', color: '#7c3aed' }}>
-              <TrendingUp size={24} />
+          <div className="stat-card">
+            <div className="stat-icon purple">
+              <Percent size={24} />
             </div>
-            <div className="admin-stat-info">
-              <div>
-                <div className="admin-stat-value">68%</div>
-                <div className="admin-stat-label">Profit Margin</div>
-              </div>
-              <div className="admin-stat-change positive">
-                <TrendingUp size={16} />
-                3.1%
-              </div>
+            <div className="stat-info">
+              <div className="stat-value">68%</div>
+              <div className="stat-label">Profit Margin</div>
+            </div>
+            <div className="stat-trend positive">
+              <TrendingUp size={16} />
+              <span>3.1%</span>
             </div>
           </div>
         </div>
 
-        {/* Main Chart - Sales Overview */}
-        {/* Sales Overview - Januari sampai Desember */}
-<div className="dashboard-section">
-  <div className="section-header">
-    <h2 className="section-title">Monthly Sales - Jan to Dec {new Date().getFullYear()}</h2>
-    <div className="section-actions">
-      <select 
-        className="month-filter"
-        value={timeRange}
-        onChange={(e) => setTimeRange(e.target.value)}
-      >
-        <option value="january">January</option>
-        <option value="february">February</option>
-        <option value="march">March</option>
-        <option value="april">April</option>
-        <option value="may">May</option>
-        <option value="june">June</option>
-        <option value="july">July</option>
-        <option value="august">August</option>
-        <option value="september">September</option>
-        <option value="october">October</option>
-        <option value="november">November</option>
-        <option value="december">December</option>
-        <option value="allMonths">All Months</option>
-      </select>
-    </div>
-  </div>
-  
-  <div className="chart-container">
-    <div style={{ 
-      padding: '20px',
-      background: '#f9fafb', 
-      borderRadius: '12px', 
-      height: '100%'
-    }}>
-      {/* Monthly Bar Chart */}
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'flex-end', 
-        justifyContent: 'space-around',
-        height: '300px',
-        padding: '20px 0',
-        position: 'relative'
-      }}>
-        {/* Grid Lines */}
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          zIndex: 0
-        }}>
-          {[0, 1, 2, 3, 4].map((line) => (
-            <div key={line} style={{
-              borderTop: '1px solid #e5e7eb',
-              width: '100%'
-            }}></div>
-          ))}
-        </div>
-        
-        {/* Bars for each month */}
-        {reportData.monthlySales.map((month, index) => {
-          const barHeight = (month.sales / maxSales) * 220;
-          return (
-            <div key={month.month} style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              zIndex: 1
-            }}>
-              {/* Sales value on top */}
-              <div style={{
-                fontSize: '12px',
-                fontWeight: '600',
-                color: '#2563eb',
-                marginBottom: '8px',
-                textAlign: 'center',
-                minHeight: '30px'
-              }}>
-                ${(month.sales / 1000).toFixed(1)}k
+        {/* Monthly Sales Chart */}
+        <div className="report-section">
+          <div className="section-header">
+            <h2 className="section-title">
+              Monthly Sales - Jan to Dec {new Date().getFullYear()}
+            </h2>
+            <div className="section-actions">
+              <select 
+                className="filter-select"
+                value={selectedMonth}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                <option value="allMonths">All Months</option>
+                <option value="january">January</option>
+                <option value="february">February</option>
+                <option value="march">March</option>
+                <option value="april">April</option>
+                <option value="may">May</option>
+                <option value="june">June</option>
+                <option value="july">July</option>
+                <option value="august">August</option>
+                <option value="september">September</option>
+                <option value="october">October</option>
+                <option value="november">November</option>
+                <option value="december">December</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="chart-container">
+            <div className="chart-wrapper">
+              {/* Bar Chart */}
+              <div className="bar-chart">
+                {filteredMonthlyData.map((month) => {
+                  const barHeight = maxSales > 0 ? (month.sales / maxSales) * 220 : 0;
+                  return (
+                    <div key={month.month} className="bar-column">
+                      <div className="bar-value">
+                        ${(month.sales / 1000).toFixed(1)}k
+                      </div>
+                      <div 
+                        className="bar" 
+                        style={{ height: `${barHeight}px` }}
+                        data-tooltip={`Sales: $${month.sales.toLocaleString()}\nOrders: ${month.orders}\nProfit: $${month.profit.toLocaleString()}`}
+                      ></div>
+                      <div className="month-label">{month.month}</div>
+                    </div>
+                  );
+                })}
               </div>
               
-              {/* Bar */}
-              <div style={{
-                width: '40px',
-                height: `${barHeight}px`,
-                background: 'linear-gradient(to top, #2563eb, #60a5fa)',
-                borderRadius: '6px 6px 0 0',
-                position: 'relative',
-                transition: 'height 0.3s ease',
-                cursor: 'pointer'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(to top, #1d4ed8, #3b82f6)';
-                e.target.style.transform = 'scale(1.05)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(to top, #2563eb, #60a5fa)';
-                e.target.style.transform = 'scale(1)';
-              }}>
-                {/* Tooltip on hover */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-50px',
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: '#1e293b',
-                  color: 'white',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  whiteSpace: 'nowrap',
-                  opacity: 0,
-                  transition: 'opacity 0.2s',
-                  pointerEvents: 'none'
-                }}>
-                  <div>Sales: ${month.sales.toLocaleString()}</div>
-                  <div>Orders: {month.orders}</div>
-                  <div>Profit: ${month.profit.toLocaleString()}</div>
+              {/* Chart Summary */}
+              <div className="chart-summary">
+                <div className="summary-item">
+                  <div className="summary-label">Total Sales</div>
+                  <div className="summary-value">${totalSales.toLocaleString()}</div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">Average Monthly</div>
+                  <div className="summary-value primary">
+                    ${Math.round(totalSales / Math.max(filteredMonthlyData.length, 1)).toLocaleString()}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">Best Month</div>
+                  <div className="summary-value green">
+                    {filteredMonthlyData.reduce((max, month) => 
+                      month.sales > max.sales ? month : max, filteredMonthlyData[0])?.month || 'N/A'}
+                  </div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">Growth YoY</div>
+                  <div className="summary-value" style={{ 
+                    color: totalSales > 400000 ? '#059669' : '#dc2626'
+                  }}>
+                    {filteredMonthlyData.length === 12 
+                      ? `${((totalSales - 400000) / 400000 * 100).toFixed(1)}%`
+                      : 'N/A'}
+                  </div>
                 </div>
               </div>
               
-              {/* Month label */}
-              <div style={{ 
-                fontSize: '13px', 
-                color: '#6b7280',
-                fontWeight: '600',
-                marginTop: '12px',
-                textAlign: 'center'
-              }}>
-                {month.month}
+              {/* Selection Info */}
+              <div className="selection-info">
+                <div className="info-title">
+                  {selectedMonth === 'allMonths' 
+                    ? 'Viewing All Months' 
+                    : `Viewing: ${selectedMonth.charAt(0).toUpperCase() + selectedMonth.slice(1)}`}
+                </div>
+                <div className="info-detail">
+                  {selectedMonth === 'allMonths' 
+                    ? `Showing sales data for all ${filteredMonthlyData.length} months` 
+                    : `Sales in ${selectedMonth}: $${filteredMonthlyData[0]?.sales.toLocaleString() || '0'}`}
+                </div>
               </div>
             </div>
-          );
-        })}
-      </div>
-      
-      {/* Summary Statistics */}
-      <div style={{ 
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '15px',
-        marginTop: '40px',
-        padding: '20px',
-        background: 'white',
-        borderRadius: '12px',
-        border: '1px solid #e5e7eb'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-            Total Annual Sales
-          </div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>
-            ${totalSales.toLocaleString()}
           </div>
         </div>
-        
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-            Average Monthly
-          </div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#2563eb' }}>
-            ${Math.round(totalSales / 12).toLocaleString()}
-          </div>
-        </div>
-        
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-            Best Month
-          </div>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#059669' }}>
-            {reportData.monthlySales.reduce((max, month) => 
-              month.sales > max.sales ? month : max, reportData.monthlySales[0])?.month || 'N/A'}
-          </div>
-        </div>
-        
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-            Growth YoY
-          </div>
-          <div style={{ 
-            fontSize: '20px', 
-            fontWeight: '700', 
-            color: totalSales > 400000 ? '#059669' : '#dc2626'
-          }}>
-            {((totalSales - 400000) / 400000 * 100).toFixed(1)}%
-          </div>
-        </div>
-      </div>
-      
-      {/* Month Selection Info */}
-      <div style={{ 
-        textAlign: 'center', 
-        marginTop: '20px',
-        color: '#6b7280',
-        fontSize: '14px',
-        padding: '15px',
-        background: '#f0f9ff',
-        borderRadius: '8px',
-        border: '1px solid #dbeafe'
-      }}>
-        <div style={{ fontWeight: '600', marginBottom: '5px' }}>
-          {timeRange === 'allMonths' ? 'Viewing All Months' : `Viewing: ${timeRange.charAt(0).toUpperCase() + timeRange.slice(1)}`}
-        </div>
-        <div style={{ fontSize: '13px' }}>
-          {timeRange === 'allMonths' 
-            ? 'Showing sales data for all 12 months' 
-            : `Sales in ${timeRange}: $${reportData.monthlySales
-                .find(m => m.month.toLowerCase().startsWith(timeRange.substring(0, 3)))?.sales.toLocaleString() || '0'}`}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
         {/* Sales by Category */}
-        <div className="dashboard-section">
+        <div className="report-section">
           <div className="section-header">
             <h2 className="section-title">Sales by Category</h2>
           </div>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: '1fr 1fr', 
-            gap: '32px',
-            alignItems: 'center'
-          }}>
-            <div>
-              <table className="recent-orders-table">
+          <div className="category-content">
+            <div className="category-table-container">
+              <table className="data-table">
                 <thead>
                   <tr>
                     <th>Category</th>
@@ -478,31 +349,17 @@ const Report = () => {
                         <strong>{cat.category}</strong>
                       </td>
                       <td>
-                        <strong style={{ color: '#059669' }}>
+                        <strong className="sales-amount">
                           ${cat.sales.toLocaleString()}
                         </strong>
                       </td>
                       <td>
-                        <div style={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: '10px'
-                        }}>
-                          <div style={{ 
-                            width: '100px', 
-                            height: '8px', 
-                            background: '#e5e7eb',
-                            borderRadius: '4px',
-                            overflow: 'hidden'
-                          }}>
-                            <div style={{
-                              width: `${cat.percentage}%`,
-                              height: '100%',
-                              background: 'linear-gradient(90deg, #2563eb, #60a5fa)',
-                              borderRadius: '4px'
-                            }}></div>
-                          </div>
-                          <span style={{ fontWeight: '600' }}>{cat.percentage}%</span>
+                        <div className="percentage-bar">
+                          <div 
+                            className="percentage-fill"
+                            style={{ width: `${cat.percentage}%` }}
+                          ></div>
+                          <span className="percentage-text">{cat.percentage}%</span>
                         </div>
                       </td>
                     </tr>
@@ -510,65 +367,26 @@ const Report = () => {
                 </tbody>
               </table>
             </div>
-            <div style={{ 
-              background: '#f9fafb',
-              padding: '20px',
-              borderRadius: '12px',
-              height: '300px',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center'
-            }}>
-              {/* Simple Pie Chart Representation */}
-              <div style={{ 
-                width: '200px', 
-                height: '200px', 
-                margin: '0 auto',
-                borderRadius: '50%',
-                background: 'conic-gradient(#2563eb 0% 35%, #60a5fa 35% 58%, #93c5fd 58% 79%, #bfdbfe 79% 91%, #dbeafe 91% 100%)',
-                position: 'relative'
-              }}>
-                <div style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  width: '100px',
-                  height: '100px',
-                  background: 'white',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'column'
-                }}>
-                  <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e293b' }}>
+            <div className="pie-chart-container">
+              <div className="pie-chart">
+                <div className="pie-center">
+                  <div className="pie-value">
                     ${totalSales.toLocaleString().slice(0, -3)}k
                   </div>
-                  <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                    Total Sales
-                  </div>
+                  <div className="pie-label">Total Sales</div>
                 </div>
-              </div>
-              <div style={{ 
-                textAlign: 'center', 
-                marginTop: '20px',
-                fontSize: '14px',
-                color: '#6b7280'
-              }}>
-                Category Distribution
               </div>
             </div>
           </div>
         </div>
 
-        {/* Top Products Table */}
-        <div className="dashboard-section">
+        {/* Top Products */}
+        <div className="report-section">
           <div className="section-header">
             <h2 className="section-title">Top Performing Products</h2>
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            <table className="recent-orders-table">
+          <div className="table-container">
+            <table className="data-table">
               <thead>
                 <tr>
                   <th>Product</th>
@@ -588,13 +406,7 @@ const Report = () => {
                         <strong>{product.name}</strong>
                       </td>
                       <td>
-                        <span style={{
-                          background: '#f3f4f6',
-                          padding: '4px 8px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          color: '#6b7280'
-                        }}>
+                        <span className="category-tag">
                           {product.category}
                         </span>
                       </td>
@@ -602,24 +414,17 @@ const Report = () => {
                         <strong>{product.sales}</strong>
                       </td>
                       <td>
-                        <strong style={{ color: '#059669' }}>
+                        <strong className="revenue-amount">
                           ${product.revenue.toLocaleString()}
                         </strong>
                       </td>
                       <td>
-                        <strong style={{ color: '#2563eb' }}>
+                        <strong className="profit-amount">
                           ${product.profit.toLocaleString()}
                         </strong>
                       </td>
                       <td>
-                        <span style={{
-                          background: profitMargin > 60 ? '#d1fae5' : '#fef3c7',
-                          color: profitMargin > 60 ? '#065f46' : '#92400e',
-                          padding: '4px 8px',
-                          borderRadius: '12px',
-                          fontSize: '12px',
-                          fontWeight: '600'
-                        }}>
+                        <span className={`margin-badge ${profitMargin > 60 ? 'high' : 'medium'}`}>
                           {profitMargin}%
                         </span>
                       </td>
@@ -631,70 +436,30 @@ const Report = () => {
           </div>
         </div>
 
-        {/* Customer Stats */}
-        <div className="dashboard-section">
+        {/* Customer Insights */}
+        <div className="report-section">
           <div className="section-header">
             <h2 className="section-title">Customer Insights</h2>
           </div>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-            gap: '20px' 
-          }}>
-            <div style={{ 
-              background: '#f0f9ff',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '2px solid #dbeafe'
-            }}>
-              <div style={{ fontSize: '28px', fontWeight: '800', color: '#0369a1', marginBottom: '8px' }}>
-                {reportData.customerStats.total}
-              </div>
-              <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
-                Total Customers
-              </div>
+          <div className="customer-grid">
+            <div className="customer-card total">
+              <div className="customer-value">{reportData.customerStats.total}</div>
+              <div className="customer-label">Total Customers</div>
             </div>
             
-            <div style={{ 
-              background: '#f0fdf4',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '2px solid #d1fae5'
-            }}>
-              <div style={{ fontSize: '28px', fontWeight: '800', color: '#059669', marginBottom: '8px' }}>
-                {reportData.customerStats.newThisMonth}
-              </div>
-              <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
-                New This Month
-              </div>
+            <div className="customer-card new">
+              <div className="customer-value">{reportData.customerStats.newThisMonth}</div>
+              <div className="customer-label">New This Month</div>
             </div>
             
-            <div style={{ 
-              background: '#fef7cd',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '2px solid #fde68a'
-            }}>
-              <div style={{ fontSize: '28px', fontWeight: '800', color: '#d97706', marginBottom: '8px' }}>
-                {reportData.customerStats.returning}
-              </div>
-              <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
-                Returning Customers
-              </div>
+            <div className="customer-card returning">
+              <div className="customer-value">{reportData.customerStats.returning}</div>
+              <div className="customer-label">Returning Customers</div>
             </div>
             
-            <div style={{ 
-              background: '#fef2f2',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '2px solid #fecaca'
-            }}>
-              <div style={{ fontSize: '28px', fontWeight: '800', color: '#dc2626', marginBottom: '8px' }}>
-                {reportData.customerStats.churnRate}%
-              </div>
-              <div style={{ color: '#6b7280', fontSize: '14px', fontWeight: '500' }}>
-                Churn Rate
-              </div>
+            <div className="customer-card churn">
+              <div className="customer-value">{reportData.customerStats.churnRate}%</div>
+              <div className="customer-label">Churn Rate</div>
             </div>
           </div>
         </div>

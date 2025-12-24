@@ -1,5 +1,5 @@
 // Update App.jsx - tambahkan import Report dan rutenya
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
@@ -15,6 +15,7 @@ import AdminDashboard from './pages/admin/AdminDasboard';
 import Report from './pages/admin/Report'; // ← Tambahkan import ini
 import Footer from './components/Footer';
 import './App.css';
+import './components/ProductCard.css';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requireAdmin = false, requireLogin = false }) => {
@@ -44,8 +45,7 @@ function App() {
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
-                <Route path="/login" element={<LoginSelection />} />
-                <Route path="/login/customer" element={<CustomerLogin />} />
+                <Route path="/login" element={<CustomerLogin />} />
                 <Route path="/login/admin" element={<AdminLogin />} />
                 <Route path="/products" element={<Products />} />
                 <Route path="/products/:id" element={<ProductDetail />} />

@@ -1,92 +1,148 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { ArrowLeft, ShoppingCart, Star, Check } from 'lucide-react';
 import LoadingSpinner from '../components/LoadingSpinner';
 import useProducts from '../hooks/UseProducts.jsx';
+import './ProductDetail.css';
+
 const ProductDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { products, loading } = useProducts();
   const { addToCart, isInCart } = useCart();
-  
+  const { user } = useAuth();
+
   const product = products.find(p => p.id === parseInt(id));
-  const inCart = product ? isInCart(product.id) : false;
+  const inCart = product && isInCart(product.id);
 
   if (loading) return <LoadingSpinner />;
 
   if (!product) {
     return (
-      <div className="error text-center">
-        <div className="error-icon">❌</div>
-        <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-        <p className="text-gray-600 mb-6">The product you're looking for doesn't exist.</p>
-        <Link to="/products" className="btn btn-primary inline-flex items-center">
-          <button className="btn" style={{ flex: 1, background: '#1e293b', color: 'white' }}> <ArrowLeft size={20} style={{ marginRight: '8px' }} />
-          Back to Products</button>
+      <div className="product-error">
+        <h2>❌ Product Not Found</h2>
+        <Link to="/products" className="btn-back">
+          <ArrowLeft size={18} /> Back to Products
         </Link>
       </div>
     );
   }
 
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart(product);
+  };
+
+  const handleBuyNow = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      navigate('/login', {
+        state: { from: `/products/${id}`, buyNow: true }
+      });
+      return;
+    }
+
+    // Clear any previous direct checkout data
+    localStorage.removeItem('directCheckout');
+    
+    // Prepare direct checkout data
+    const directCheckoutData = {
+      items: [{ 
+        ...product, 
+        quantity: 1,
+        // Ensure all required fields are included
+        id: product.id,
+        title: product.title,
+        price: product.price,
+        image: product.image,
+        category: product.category
+      }],
+      total: product.price,
+      isDirectCheckout: true,
+      timestamp: Date.now()
+    };
+
+    console.log('Direct checkout data:', directCheckoutData); // Debug log
+    
+    // Save to localStorage
+    localStorage.setItem('directCheckout', JSON.stringify(directCheckoutData));
+    
+    // Navigate to checkout
+    navigate('/checkout', { 
+      state: { 
+        isDirectCheckout: true,
+        productId: product.id
+      } 
+    });
+  };
+
   return (
-    <div>
-      <Link 
-        to="/products"
-        className="btn btn-secondary"
-        style={{ alignItems: 'center', textDecoration: 'none' , margin : '10px'}}>
-        <ArrowLeft size={20} style={{ marginRight: '8px' }} />
-        Back to Products
+    <div className="product-detail-page">
+      <Link to="/products" className="btn-back">
+        <ArrowLeft size={18} /> Back to Products
       </Link>
 
       <div className="product-detail">
-        <div className="product-detail-content">
-          <div className="detail-image">
-            <img src={product.image} alt={product.title} />
+        {/* IMAGE */}
+        <div className="product-image-box">
+          <img src={product.image} alt={product.title} />
+        </div>
+
+        {/* INFO */}
+        <div className="product-info-box">
+          <span className="product-category">{product.category}</span>
+
+          <h1 className="product-title">{product.title}</h1>
+
+          <div className="product-rating">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                size={20}
+                className={i < Math.round(product.rating.rate) ? 'star-filled' : ''}
+              />
+            ))}
+            <span>
+              {product.rating.rate} ({product.rating.count} reviews)
+            </span>
           </div>
 
-          <div className="detail-info">
-            <span className="product-category">{product.category}</span>
-            <h1 className="detail-title">{product.title}</h1>
-            
-            <div className="flex items-center gap-2">
-              <div className="flex" style={{ color: '#f59e0b' }}>
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i}
-                    size={20}
-                    fill={i < Math.round(product.rating.rate) ? 'currentColor' : 'none'}
-                    style={{ color: i < Math.round(product.rating.rate) ? '#f59e0b' : '#e2e8f0' }}
-                  />
-                ))}
-              </div>
-              <span className="text-gray-600">
-                {product.rating.rate} ({product.rating.count} reviews)
-              </span>
-            </div>
+          <div className="product-price">
+            ${product.price.toFixed(2)}
+          </div>
 
-            <p className="detail-price">${product.price}</p>
+          <div className="product-description">
+            <h3>Description</h3>
+            <p>{product.description}</p>
+          </div>
 
-            <p className="detail-description">{product.description}</p>
+          <div className="product-actions">
+            <button
+              className={`btn-cart ${inCart ? 'added' : ''}`}
+              onClick={handleAddToCart}
+              disabled={inCart}
+            >
+              {inCart ? (
+                <>
+                  <Check size={18} /> Added
+                </>
+              ) : (
+                <>
+                  <ShoppingCart size={20} /> Add to Cart
+                </>
+              )}
+            </button>
 
-            <div className="detail-actions">
-              <button 
-                onClick={() => addToCart(product)}
-                className={`btn ${inCart ? 'btn-secondary' : 'btn-primary'} flex items-center justify-center`}
-                style={{ flex: 1 }}
-                disabled={inCart}
-              >
-                <ShoppingCart size={20} style={{ marginRight: '8px' }} />
-                {inCart ? (
-                  <>
-                    <Check size={18} style={{ marginRight: '8px' }} />
-                    Added to Cart
-                  </>
-                ) : 'Add to Cart'}
-              </button>
-              
-              <button className="btn" style={{ flex: 1, background: '#1e293b', color: 'white' }}>
-                Buy Now
-              </button>
-            </div>
+            <button 
+              className="btn-buy" 
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </button>
           </div>
         </div>
       </div>

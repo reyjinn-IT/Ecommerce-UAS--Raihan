@@ -1,7 +1,7 @@
 import { useState } from 'react';
 // import useProducts from '../hooks/useProducts';
 import useProducts from '../hooks/UseProducts';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/ProductCard'; 
 import LoadingSpinner from '../components/LoadingSpinner';
 import { Search, Filter, X } from 'lucide-react';
 
@@ -56,12 +56,12 @@ const Products = () => {
   return (
     <div>
       {/* Page Header */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">All Products</h1>
         <p className="text-gray-600 mt-2">
           Browse our collection of premium products
         </p>
-      </div>
+      </div> */}
 
       {/* Filter Section - RAPIH */}
       <div className="filter-section">

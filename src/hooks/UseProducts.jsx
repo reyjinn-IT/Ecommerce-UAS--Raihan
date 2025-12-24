@@ -14,7 +14,7 @@ const useProducts = () => {
         setProducts(response.data);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
+        setError('Please try again later.');
         console.error('Error:', err);
       } finally {
         setLoading(false);
